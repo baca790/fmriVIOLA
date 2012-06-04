@@ -1,0 +1,2 @@
+.* # ignore dot files
+*~ # ignore tilde (temporary) files
