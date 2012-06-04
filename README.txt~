@@ -87,6 +87,5 @@ Double Gamma & Temporal Derivative models from either FSL or SPM:
 however for all tests only data, input_stim_init and TR are mandatory.
 
 Known issues/ improvements (for next release June 2012):
-Requires MATLAB 2010b or newer.
 Currently requires fMRI data input as a 2D matrix (time x voxels). Future versions will include support for SPM data structures and additional tools for reporting and interpreting results.  
 This version selects model orders (AR and regression) separately, as a first approximation to a cyclic descent procedure. Future versions of the software will estimate these concurrently (although with added performance penalty).
