@@ -39,14 +39,15 @@
 classdef LM_TV < LM_test_fmri
     
     properties
-        ordermax_LBF = 13;       % laguerre basis regressor order
-        ordermax_m = 5;          % max order of time-varying model
+        ordermax_LBF = 12;       % laguerre basis regressor order
+        ordermax_m = 4;          % max order of time-varying model
         a_laguerre = 5;          % Laguerre-basis scaling parameter
         len_HRF = 30;            % Length of HRF model (seconds);        
         Z_full;                  % Anomaly regression matrix
         Xi;                      % convolution of input stimulus with 
                                  % continuous Laguerre polynomial basis set
                                  % (L x ordermax_LBF).
+                                 
         
         
     end
@@ -81,33 +82,107 @@ classdef LM_TV < LM_test_fmri
         end
         
         function lm_tv = inLoopSetup(lm_tv)
-            if ~isempty(lm_tv.presetPolyDrift)
-                order_polydrift = lm_tv.presetPolyDrift;
-            else
-                order_polydrift = getRegressionModelOrder(lm_tv.y.t, lm_tv.polydrift.t, 1);
+            
+            % assuming no preset poly drift order
+            BIC = NaN*zeros(lm_tv.ordermax_drift,...
+                            lm_tv.ordermax_LBF+1,...
+                            lm_tv.ordermax_m,...
+                            lm_tv.ordermax_AR+1);
+            for o_poly = 1:lm_tv.ordermax_drift
+                drift.t = [lm_tv.polydrift.t(:,1:o_poly), ...
+                                lm_tv.extraDriftVars.t];
+                for o_LBF = 1:lm_tv.ordermax_LBF+1
+                    LBF.t = lm_tv.Xi.t(:,1:o_LBF);
+                    for o_TV = 1:lm_tv.ordermax_m
+                        TV_cmpt.t = [];
+                        for index = 1:o_TV
+                            TV_cmpt.t = [TV_cmpt.t lm_tv.Z_full.t(:,(1:o_LBF)+(index-1)*lm_tv.ordermax_LBF+1)];
+                        end
+                        
+                        %%% fit model with specified orders
+                        %regression matrix for calculating model fit
+                        %(unfortunately we have to do this under H_1)
+                        regMatx = [drift.t LBF.t TV_cmpt.t];
+                        b = regMatx\lm_tv.y.t;
+                        v = lm_tv.y.t - regMatx*b; % residual
+                        v_mc = v- mean(v);
+                        
+                        
+                        if ~isempty(lm_tv.ARpreallocated);
+                            range_AR = lm_tv.ARpreallocated;
+                        else
+                            range_AR = 0:lm_tv.ordermax_AR;
+                        end
+                        for o_AR = range_AR;
+                        
+                            
+                            % calculate BIC from model
+                            if o_AR ==0
+                                nVar = ((lm_tv.y.t-regMatx*b).'*(lm_tv.y.t-regMatx*b))/(lm_tv.L - size(regMatx,2));
+                            else
+                                [~, nVar] = arburg(v_mc ,o_AR); % AR model
+                            end
+                            BIC(o_poly, o_LBF, o_TV, o_AR+1) = ...
+                                lm_tv.L*log(nVar) + log(lm_tv.L)*(o_poly+o_LBF+o_TV+o_AR);
+                        end
+                    end
+                end
             end
             
+            % extract minimum BIC point here
+            [~,BICminIdx] = min(BIC(:));
+            
+            % set orders based on minimum BIC
+            [order_polydrift, order_LBF, order_TV, lm_tv.order_AR] = ...
+                ind2sub([lm_tv.ordermax_drift,...
+                            lm_tv.ordermax_LBF+1,...
+                            lm_tv.ordermax_m,...
+                            lm_tv.ordermax_AR+1], BICminIdx);
             drift.t = [lm_tv.polydrift.t(:,1:order_polydrift), ...
-                        lm_tv.extraDriftVars.t];
+                lm_tv.extraDriftVars.t];
             drift.k = [lm_tv.polydrift.k(:,1:order_polydrift), ...
-                        lm_tv.extraDriftVars.k];
+                lm_tv.extraDriftVars.k];
             
-            y_nodrift = lm_tv.y.t - drift.t*(drift.t\lm_tv.y.t);
-            order_LBF = getRegressionModelOrder(y_nodrift, lm_tv.Xi.t);
-%             lm_tv.DEBUG.order_LBF = order_LBF;
-            
-            order_TV = getRegressionModelOrder(y_nodrift, lm_tv.Z_full.t, lm_tv.ordermax_LBF+1, order_LBF);
-%             lm_tv.DEBUG.order_TV = order_TV;
-            
+            % set regressors based on min-orders
             lm_tv.X.t = [lm_tv.Xi.t(:,1:order_LBF) drift.t];
             lm_tv.X.k = [lm_tv.Xi.k(:,1:order_LBF) drift.k];
             lm_tv.x_k = [lm_tv.Xi.k(:,1:order_LBF) drift.k].';
-
+            
             lm_tv.z_k = [];
             for index = 1:order_TV
-            lm_tv.z_k = [lm_tv.z_k, lm_tv.Z_full.k(:,(1:order_LBF)+(index-1)*(lm_tv.ordermax_LBF+1))];
+                lm_tv.z_k = [lm_tv.z_k, lm_tv.Z_full.k(:,(1:order_LBF)+(index-1)*(lm_tv.ordermax_LBF+1))];
             end
             lm_tv.z_k = lm_tv.z_k.';
+            
+            
+            
+%             if ~isempty(lm_tv.presetPolyDrift)
+%                 order_polydrift = lm_tv.presetPolyDrift;
+%             else
+%                 order_polydrift = getRegressionModelOrder(lm_tv.y.t, lm_tv.polydrift.t, 1);
+%             end
+%             
+%             drift.t = [lm_tv.polydrift.t(:,1:order_polydrift), ...
+%                         lm_tv.extraDriftVars.t];
+%             drift.k = [lm_tv.polydrift.k(:,1:order_polydrift), ...
+%                         lm_tv.extraDriftVars.k];
+%             
+%             y_nodrift = lm_tv.y.t - drift.t*(drift.t\lm_tv.y.t);
+%             order_LBF = getRegressionModelOrder(y_nodrift, lm_tv.Xi.t);
+% %             lm_tv.DEBUG.order_LBF = order_LBF;
+%             
+%             order_TV = getRegressionModelOrder(y_nodrift, lm_tv.Z_full.t, lm_tv.ordermax_LBF+1, order_LBF);
+% %             lm_tv.DEBUG.order_TV = order_TV;
+%             
+%             lm_tv.X.t = [lm_tv.Xi.t(:,1:order_LBF) drift.t];
+%             lm_tv.X.k = [lm_tv.Xi.k(:,1:order_LBF) drift.k];
+%             lm_tv.x_k = [lm_tv.Xi.k(:,1:order_LBF) drift.k].';
+% 
+%             lm_tv.z_k = [];
+%             for index = 1:order_TV
+%             lm_tv.z_k = [lm_tv.z_k, lm_tv.Z_full.k(:,(1:order_LBF)+(index-1)*(lm_tv.ordermax_LBF+1))];
+%             end
+%             lm_tv.z_k = lm_tv.z_k.';
         end
 
         function Z_fullTVHRF = fullTimeVaryingHRFvariables(lm_tv)

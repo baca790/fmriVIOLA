@@ -28,9 +28,11 @@ classdef LM_test_fmri < LM_test
         polydrift            % drift regressors, (L x ordermax_drift)
                              % struct: .t = time signal, .k = freq sig
         ordermax_drift = 3;  % Default maximum polynomial drift order
-        presetPolyDrift =[]; % integer: ignore this and choose polynomial
-                             % drift order using BIC for an accurate drift 
-                             % model fit.
+        ordermax_AR = 3;     % Default maximum autoregressive model order
+        order_AR             % ?private: AR model order in use
+        presetPolyDrift =[]; % integer: default is to ignore this and 
+                             % choose polynomial drift order using BIC for 
+                             % an accurate drift model fit.
                              % Otherwise use this to specify integer 
                              % from 0 (just dc) to 3 (all up to 3rd 
                              % order polynomial drift)
@@ -99,15 +101,31 @@ classdef LM_test_fmri < LM_test
                     % fit model under null hypothesis
                     b =lm_fmri.X.t\lm_fmri.y.t;
                     
-                    % Autoregressive noise correction
-                    [lm_fmri.b, ~, ~, y_out, X_out] = ...
-                        colourednoise_estimation(lm_fmri.y.t, ...
-                                                 lm_fmri.X.t, ...
-                                                 b, ...
-                                                 lm_fmri.ARpreallocated);
+%                     % Autoregressive noise correction
+%                     [lm_fmri.b, ~, ~, y_out, X_out] = ...
+%                         colourednoise_estimation(lm_fmri.y.t, ...
+%                                                  lm_fmri.X.t, ...
+%                                                  b, ...
+%                                                  lm_fmri.ARpreallocated);
+%                                              
+                    if lm_fmri.order_AR == 0
+                        y_ar = lm_fmri.y.t;
+                        X_ar = lm_fmri.X.t;
+                        lm_fmri.b = b;
+                    else
+                        v = lm_fmri.y.t - lm_fmri.X.t*b; % residual
+                        v_mc = v - mean(v);
+                        
+                        [phi, ~] = arburg(v_mc ,lm_fmri.order_AR); % AR model
+                        y_ar = filtfilt(phi(:),1,lm_fmri.y.t);  % signal estimated
+                        X_ar = filtfilt(phi(:),1,lm_fmri.X.t);  % parameter estimated
+                        lm_fmri.b = X_ar\y_ar;
+                    end
+
+                                             
                     % AR corrected signals
-                    lm_fmri.y = timeFreqSig(y_out, 'time', NFFT_buf, L);
-                    lm_fmri.X = timeFreqSig(X_out, 'time', NFFT_buf, L);
+                    lm_fmri.y = timeFreqSig(y_ar, 'time', NFFT_buf, L);
+                    lm_fmri.X = timeFreqSig(X_ar, 'time', NFFT_buf, L);
                     
                     % Test statistic at voxel (n)
                     lm_fmri.V(n) = lagrange_multiplier_test_univariate(lm_fmri);

@@ -92,21 +92,65 @@ classdef LM_NL < LM_test_fmri
         
         function lm_nl = inLoopSetup(lm_nl)
             
-            if ~isempty(lm_nl.presetPolyDrift)
-                order_polydrift = lm_nl.presetPolyDrift;
-            else
-                order_polydrift = getRegressionModelOrder(lm_nl.y.t, lm_nl.polydrift.t);
+            BIC = NaN*zeros(lm_nl.ordermax_drift,...
+                            lm_nl.ordermax_AR);
+            for o_polydrift = 1:lm_nl.ordermax_drift
+                drift.t = [lm_nl.polydrift.t(:,1:o_polydrift), ...
+                    lm_nl.extraDriftVars.t];
+                regMatx = [lm_nl.zeta_ab.t drift.t]; % just H0 since there 
+                                                     % is no order
+                                                     % selection for H1 in
+                                                     % this case
+                b = regMatx\lm_nl.y.t;
+                v = lm_nl.y.t - regMatx*b;
+                v_mc = v - mean(v);
+                if ~isempty(lm_nl.ARpreallocated);
+                    range_AR = lm_nl.ARpreallocated;
+                else
+                    range_AR = 0:lm_nl.ordermax_AR;
+                end
+                for o_AR = range_AR;
+                    if o_AR ==0
+                        nVar = ((lm_nl.y.t-regMatx*b).'*(lm_nl.y.t-regMatx*b))/(lm_nl.L - size(regMatx,2));
+                    else
+                        [~, nVar] = arburg(v_mc ,o_AR); % AR model
+                    end
+                    BIC(o_polydrift, o_AR+1) = ...
+                        lm_nl.L*log(nVar) + log(lm_nl.L)*(o_polydrift+o_AR);
+                end
             end
-            drift.t = [lm_nl.polydrift.t(:,1:order_polydrift), ...
-                        lm_nl.extraDriftVars.t];
-            drift.k = [lm_nl.polydrift.k(:,1:order_polydrift), ...
-                        lm_nl.extraDriftVars.k];
-            lm_nl.DEBUG.order_drift = order_polydrift;
+            % extract minimum BIC point here
+            [~,BICminIdx] = min(BIC(:));
             
+            % set orders based on minimum BIC
+            [order_polydrift, lm_tv.order_AR] = ...
+                ind2sub([lm_nl.ordermax_drift,...
+                         lm_nl.ordermax_AR+1], BICminIdx);
+            drift.t = [lm_nl.polydrift.t(:,1:order_polydrift), ...
+                lm_nl.extraDriftVars.t];
+            drift.k = [lm_nl.polydrift.k(:,1:order_polydrift), ...
+                lm_nl.extraDriftVars.k];
+                        
             lm_nl.X.t = [lm_nl.zeta_ab.t ,drift.t];
             lm_nl.X.k = [lm_nl.zeta_ab.k ,drift.k];
             
             lm_nl.x_k = [lm_nl.zeta_ab.k, drift.k].';
+                        
+%             if ~isempty(lm_nl.presetPolyDrift)
+%                 order_polydrift = lm_nl.presetPolyDrift;
+%             else
+%                 order_polydrift = getRegressionModelOrder(lm_nl.y.t, lm_nl.polydrift.t);
+%             end
+%             drift.t = [lm_nl.polydrift.t(:,1:order_polydrift), ...
+%                         lm_nl.extraDriftVars.t];
+%             drift.k = [lm_nl.polydrift.k(:,1:order_polydrift), ...
+%                         lm_nl.extraDriftVars.k];
+%             lm_nl.DEBUG.order_drift = order_polydrift;
+%             
+%             lm_nl.X.t = [lm_nl.zeta_ab.t ,drift.t];
+%             lm_nl.X.k = [lm_nl.zeta_ab.k ,drift.k];
+%             
+%             lm_nl.x_k = [lm_nl.zeta_ab.k, drift.k].';
         end
         
     end

@@ -95,26 +95,76 @@ classdef LM_DG < LM_test_fmri
         % Signals which require updating for every voxel, i.e. model order
         % selection.
         function lm_dg = inLoopSetup(lm_dg)
-            if ~isempty(lm_dg.presetPolyDrift)
-                order_polydrift = lm_dg.presetPolyDrift;
-            else
-                order_polydrift = getRegressionModelOrder(lm_dg.y.t, lm_dg.polydrift.t, 1);
+            
+            BIC = NaN*zeros(lm_dg.ordermax_drift,...
+                            lm_dg.ordermax_LBF+1,...
+                            lm_dg.ordermax_AR+1);
+            for o_polydrift = 1:lm_dg.ordermax_drift
+                drift.t = [lm_dg.polydrift.t(:,1:o_polydrift), ...
+                    lm_dg.extraDriftVars.t];
+                for o_LBF = 1:lm_dg.ordermax_LBF+1
+                    LBF.t = lm_dg.Xi.t(:,1:o_LBF);
+                    
+                    regMatx = [drift.t LBF.t];
+                    b = regMatx\lm_dg.y.t;
+                    v = lm_dg.y.t - regMatx*b;
+                    v_mc = v - mean(v);
+                    
+                    if ~isempty(lm_dg.ARpreallocated);
+                        range_AR = lm_dg.ARpreallocated;
+                    else
+                        range_AR = 0:lm_dg.ordermax_AR;
+                    end
+                    for o_AR = range_AR;
+                        if o_AR ==0
+                            nVar = ((lm_dg.y.t-regMatx*b).'*(lm_dg.y.t-regMatx*b))/(lm_dg.L - size(regMatx,2));
+                        else
+                            [~, nVar] = arburg(v_mc ,o_AR); % AR model
+                        end
+                        BIC(o_polydrift, o_LBF, o_AR+1) = ...
+                            lm_dg.L*log(nVar) + log(lm_dg.L)*(o_polydrift+o_LBF+o_AR);
+                    end
+                end
             end
             
+            % extract minimum BIC point here
+            [~,BICminIdx] = min(BIC(:));
+            
+            % set orders based on minimum BIC
+            [order_polydrift, order_LBF, lm_tv.order_AR] = ...
+                ind2sub([lm_dg.ordermax_drift,...
+                         lm_dg.ordermax_LBF+1,...
+                         lm_dg.ordermax_AR+1], BICminIdx);
             drift.t = [lm_dg.polydrift.t(:,1:order_polydrift), ...
-                        lm_dg.extraDriftVars.t];
+                lm_dg.extraDriftVars.t];
             drift.k = [lm_dg.polydrift.k(:,1:order_polydrift), ...
-                        lm_dg.extraDriftVars.k];
-          
-            y_nodrift = lm_dg.y.t - drift.t*(drift.t\lm_dg.y.t);
-            order_LBF = getRegressionModelOrder(y_nodrift, lm_dg.Xi.t);
-%             lm_dg.DEBUG.order_LBF = order_LBF;
-%             lm_dg.DEBUG.order_drift = order_polydrift;
+                lm_dg.extraDriftVars.k];
             
             lm_dg.X.t = [lm_dg.rho.t, drift.t];
             lm_dg.X.k = [lm_dg.rho.k, drift.k];
             lm_dg.x_k = [lm_dg.rho.k, drift.k].';
             lm_dg.z_k = lm_dg.Xi.k(:,1:order_LBF).';
+            
+%             if ~isempty(lm_dg.presetPolyDrift)
+%                 order_polydrift = lm_dg.presetPolyDrift;
+%             else
+%                 order_polydrift = getRegressionModelOrder(lm_dg.y.t, lm_dg.polydrift.t, 1);
+%             end
+%             
+%             drift.t = [lm_dg.polydrift.t(:,1:order_polydrift), ...
+%                         lm_dg.extraDriftVars.t];
+%             drift.k = [lm_dg.polydrift.k(:,1:order_polydrift), ...
+%                         lm_dg.extraDriftVars.k];
+%           
+%             y_nodrift = lm_dg.y.t - drift.t*(drift.t\lm_dg.y.t);
+%             order_LBF = getRegressionModelOrder(y_nodrift, lm_dg.Xi.t);
+% %             lm_dg.DEBUG.order_LBF = order_LBF;
+% %             lm_dg.DEBUG.order_drift = order_polydrift;
+%             
+%             lm_dg.X.t = [lm_dg.rho.t, drift.t];
+%             lm_dg.X.k = [lm_dg.rho.k, drift.k];
+%             lm_dg.x_k = [lm_dg.rho.k, drift.k].';
+%             lm_dg.z_k = lm_dg.Xi.k(:,1:order_LBF).';
         end
         
         % setup convolved HRF signal
