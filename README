@@ -1,4 +1,7 @@
+.. -*- mode: rst -*-
+
 Identifying fMRI Model Violations with Lagrange Multiplier Tests
+================================================================
 
 (software version 0.2)
 
@@ -30,6 +33,8 @@ Basic instructions:
 4- Test your own data!
 
 ------------------------
+Publications
+============
 
 Full details of the tests are available in:
 B. Cassidy, CJ. Long, C. Rae, V. Solo, "Identifying fMRI Model Violations with Lagrange Multiplier Tests", IEEE Transactions on Medical Imaging, accepted for publication.
@@ -37,7 +42,8 @@ B. Cassidy, V. Solo, "fMRI Model Diagnostics for the Double Gamma and Temporal D
 
 ------------------------
 
-Technical notes:
+Technical notes
+===============
 
 The OOP software structure allows simple addition of new tests for other model violations (fMRI or otherwise).
 
