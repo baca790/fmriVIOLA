@@ -37,9 +37,18 @@ Publications
 ============
 
 Full details of the tests are available in:
-B. Cassidy, CJ. Long, C. Rae, V. Solo, "Identifying fMRI Model Violations with Lagrange Multiplier Tests", IEEE Transactions on Medical Imaging, in press.
-B. Cassidy, V. Solo, "fMRI Model Diagnostics for the Double Gamma and Temporal Derivative", IEEE International Symposium on Biomedical Imaging, 2012.
 
+B. Cassidy, CJ. Long, C. Rae, V. Solo, 
+"Identifying fMRI Model Violations with Lagrange Multiplier Tests", 
+IEEE Transactions on Medical Imaging, in press.
+
+http://dx.doi.org/10.1109/TMI.2012.2195327
+
+B. Cassidy, V. Solo, 
+"fMRI Model Diagnostics for the Double Gamma and Temporal Derivative", 
+IEEE International Symposium on Biomedical Imaging, 2012.
+
+http://neura.edu.au/research/facilities/neura-imaging-centre/software
 ------------------------
 
 Technical notes
@@ -99,8 +108,6 @@ Requires MATLAB 2010b or newer.
 
 Currently requires fMRI data input as a 2D matrix (time x voxels). Future versions will include support for SPM data structures and additional tools for reporting and interpreting results.  
 
-This version selects model orders (AR and regression) separately, as a first approximation to a cyclic descent procedure. A development branch is available on github as 
+Output anomaly test statistic is in the same shape as the input data, so will need reshaping to view the anomaly map (although the map is instructive, the presence of model anomaly anywhere within an fMRI data volume is cause for concern; see http://dx.doi.org/10.1109/TMI.2012.2195327).
 
-    /simulParaEst 
-    
-which estimates parameters jointly, though with an obvious performance penalty.
+This version selects model orders (AR and regression) separately, as a first approximation to a cyclic descent procedure. A git development branch is available (origin/simulParaEst/) which estimates these parameters concurrently (although with added performance penalty).
