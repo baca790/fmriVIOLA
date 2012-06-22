@@ -1,4 +1,3 @@
-
 Identifying fMRI Model Violations with Lagrange Multiplier Tests
 ================================================================
 
@@ -36,7 +35,7 @@ Publications
 ============
 
 Full details of the tests are available in:
-B. Cassidy, CJ. Long, C. Rae, V. Solo, "Identifying fMRI Model Violations with Lagrange Multiplier Tests", IEEE Transactions on Medical Imaging, accepted for publication.
+B. Cassidy, CJ. Long, C. Rae, V. Solo, "Identifying fMRI Model Violations with Lagrange Multiplier Tests", IEEE Transactions on Medical Imaging, in press.
 B. Cassidy, V. Solo, "fMRI Model Diagnostics for the Double Gamma and Temporal Derivative", IEEE International Symposium on Biomedical Imaging, 2012.
 
 ------------------------
@@ -69,7 +68,7 @@ assumptions.
 
 Default test definitions take an input of form:
 
-TEST_OBJ = SPECIFIC_TEST_OBJECT
+    TEST_OBJ = SPECIFIC_TEST_OBJECT
                 (data, ...
                  input_stim_init, ...
                  TR, ...
@@ -77,16 +76,16 @@ TEST_OBJ = SPECIFIC_TEST_OBJECT
                  <ALL: optional> extraDriftVars)
 
 where
-       data            = type=double  : dim (#TimePoints x #Voxels)
+    data            = type=double  : dim (#TimePoints x #Voxels)
                          -- fMRI data matrix (2D)
-       input_stim_init = type=logical : dim (#TimePoints x 1)
+    input_stim_init = type=logical : dim (#TimePoints x 1)
                          -- input stimulus signal
-       TR              = type=double  : scalar
+    TR              = type=double  : scalar
                          -- Sampling repetition time (seconds)
 
 The Double Gamma HRF test has an additional optional input to test the
 Double Gamma & Temporal Derivative models from either FSL or SPM:
-       DG_DERIV        = type=string  : 'SPM', 'FSL', false
+    DG_DERIV        = type=string  : 'SPM', 'FSL', false
                          -- optional, test validity of DG+derivative model
 
 however for all tests only data, input_stim_init and TR are mandatory.
