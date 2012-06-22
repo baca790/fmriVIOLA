@@ -24,7 +24,7 @@ The current version includes tests for violation of the following model assumpti
 ------------------------
 Basic instructions:
 1- Add folders to matlab path via 
-        -> File -> Set Path -> Add With Subfolders
+    -> File -> Set Path -> Add With Subfolders
 
 2- Load LM_testData.mat from the 'examples' folder
 
@@ -51,11 +51,9 @@ The object hierarchy is
 	
 	LM_test
 	   |
-	   v
-   LM_test_fmri
+    LM_test_fmri
 	   |
-	   v
-   anomalyTest
+    anomalyTest
 
 where anomalyTest is either LM_DG, LM_NL or LM_TV depending on the
 desired test.  The tests are implemented as objects, so the user 
@@ -78,6 +76,7 @@ Default test definitions take an input of form:
                  <ALL: optional> extraDriftVars)
 
 where
+
     data            = type=double  : dim (#TimePoints x #Voxels)
                          -- fMRI data matrix (2D)
     input_stim_init = type=logical : dim (#TimePoints x 1)
@@ -87,12 +86,21 @@ where
 
 The Double Gamma HRF test has an additional optional input to test the
 Double Gamma & Temporal Derivative models from either FSL or SPM:
+    
     DG_DERIV        = type=string  : 'SPM', 'FSL', false
                          -- optional, test validity of DG+derivative model
 
 however for all tests only data, input_stim_init and TR are mandatory.
 
 Known issues/ improvements (for next release June 2012):
+--------------------------------------------------------
+
 Requires MATLAB 2010b or newer.
+
 Currently requires fMRI data input as a 2D matrix (time x voxels). Future versions will include support for SPM data structures and additional tools for reporting and interpreting results.  
-This version selects model orders (AR and regression) separately, as a first approximation to a cyclic descent procedure. Future versions of the software will estimate these concurrently (although with added performance penalty).
+
+This version selects model orders (AR and regression) separately, as a first approximation to a cyclic descent procedure. A development branch is available on github as 
+
+    /simulParaEst 
+    
+which estimates parameters jointly, though with an obvious performance penalty.
