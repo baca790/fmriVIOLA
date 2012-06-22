@@ -1,4 +1,3 @@
-.. -*- mode: rst -*-
 
 Identifying fMRI Model Violations with Lagrange Multiplier Tests
 ================================================================
