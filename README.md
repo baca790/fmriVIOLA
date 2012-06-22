@@ -1,5 +1,7 @@
-Identifying fMRI Model Violations with Lagrange Multiplier Tests
-================================================================
+Identifying fMRI Model Violations 
+=================================
+with Lagrange Multiplier Tests
+------------------------------
 
 (software version 0.2)
 
