@@ -12,7 +12,7 @@
 % USAGE: e.g. for test object "LM":
 %   
 %   1)
-%   LM = LM_DG(data, input_stim_init, TR, TEST_DERIVATIVE);
+%   LM = LM_DG(data, input_stim_init, TR, DG_DERIV);
 %       data            = type=double  : dim (#TimePoints x #Voxels)
 %                         -- fMRI data
 %       input_stim_init = type=logical : dim (#TimePoints x 1)
