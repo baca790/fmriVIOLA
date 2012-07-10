@@ -102,7 +102,7 @@ Double Gamma & Temporal Derivative models from either FSL or SPM:
 
 however for all tests only data, input_stim_init and TR are mandatory.
 
-Known issues/ improvements (for next release June 2012):
+Known issues/ improvements needed:
 --------------------------------------------------------
 
 Requires MATLAB 2010b or newer.
