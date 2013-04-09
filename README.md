@@ -40,7 +40,7 @@ Full details of the tests are available in:
 
 B. Cassidy, CJ. Long, C. Rae, V. Solo, 
 "Identifying fMRI Model Violations with Lagrange Multiplier Tests", 
-IEEE Transactions on Medical Imaging, in press.
+IEEE Transactions on Medical Imaging, vol 31, 7, pp1481-1492, 2012.
 
 http://dx.doi.org/10.1109/TMI.2012.2195327
 
