@@ -116,8 +116,7 @@ classdef LM_test_fmri < LM_test
                         X_ar = dcfilt(phi(:),1,lm_fmri.X.t);  % regressor estimated
                         lm_fmri.b = X_ar\y_ar;
                     end
-
-                                             
+                     
                     % AR corrected signals
                     lm_fmri.y = timeFreqSig(y_ar, 'time', NFFT_buf, L);
                     lm_fmri.X = timeFreqSig(X_ar, 'time', NFFT_buf, L);

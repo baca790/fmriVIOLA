@@ -1,6 +1,8 @@
 % Lagrange Multiplier fMRI model tests example script
 
 % 1) load LM_testData.mat
+% this example includes real data, TR==2, and an awkward input stimulus 
+% signal which involves a whole bunch of stuff happening for this data.
 fdir = fileparts(which('example_fmriTest'));
 load([fdir '/LM_testData.mat']); % should be in same directory
 

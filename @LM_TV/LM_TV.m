@@ -47,9 +47,6 @@ classdef LM_TV < LM_test_fmri
         Xi;                      % convolution of input stimulus with 
                                  % continuous Laguerre polynomial basis set
                                  % (L x ordermax_LBF).
-                                 
-        
-        
     end
     
     methods

@@ -87,7 +87,6 @@ classdef LM_NL < LM_test_fmri
             lm_nl.z_k = zeta_c_k.';
 
             lm_nl = setupPolyDrift(lm_nl);
-            
         end
         
         function lm_nl = inLoopSetup(lm_nl)
@@ -135,7 +134,7 @@ classdef LM_NL < LM_test_fmri
             lm_nl.X.k = [lm_nl.zeta_ab.k ,drift.k];
             
             lm_nl.x_k = [lm_nl.zeta_ab.k, drift.k].';
-                        
+            
 %             if ~isempty(lm_nl.presetPolyDrift)
 %                 order_polydrift = lm_nl.presetPolyDrift;
 %             else

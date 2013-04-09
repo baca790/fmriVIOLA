@@ -202,7 +202,6 @@ classdef LM_DG < LM_test_fmri
                         - (((t.^15) - (sum2))./(6*gamma(16))));
                     lm_dg.a_laguerre = 0;
                 otherwise
-                    %
                     lm_dg.a_laguerre = 5;
             end
             
