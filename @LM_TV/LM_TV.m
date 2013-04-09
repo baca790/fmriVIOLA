@@ -103,6 +103,15 @@ classdef LM_TV < LM_test_fmri
                         %regression matrix for calculating model fit
                         %(unfortunately we have to do this under H_1)
                         regMatx = [drift.t LBF.t TV_cmpt.t];
+                        
+                        % intervening.....
+                        % slight hack check for overfit which would lead to
+                        % conditioning problems, collinear model etc.
+                        % Shouldn't use these cases in valid analysis anyway.
+                        if size(regMatx,2) >  (lm_tv.L / 10) % magic number, oh well...
+                            break % BIC will be ignored for this combo.
+                        end
+                        
                         b = regMatx\lm_tv.y.t;
                         v = lm_tv.y.t - regMatx*b; % residual
                         v_mc = v- mean(v);

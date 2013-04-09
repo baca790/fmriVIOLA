@@ -1,6 +1,8 @@
 % Lagrange Multiplier fMRI model tests example script
 
 % 1) load LM_testData.mat
+fdir = fileparts(which('example_fmriTest'));
+load([fdir '/LM_testData.mat']); % should be in same directory
 
 % 2) reshape data for input
 %   data dimensions currently arranged 4D as (x,y,z,time) for x,y,z voxels
