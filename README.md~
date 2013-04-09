@@ -113,7 +113,7 @@ Output anomaly test statistic is in the same shape as the input data, so will ne
 
 This version selects model orders (AR and regression) separately, as a first approximation to a cyclic descent procedure. A git development branch is available (origin/simulParaEst/) which estimates these parameters concurrently (although with added performance penalty).
 
-minor changes and speedups since v0.2. Small hack for linear filtering initial conditions so we don't need backwards prediction?
+minor changes and speedups since v0.2. Small hack for linear filtering initial conditions so we don't need backwards prediction.
 
 License
 =======
